@@ -1,11 +1,11 @@
-import GeneralQueries from '../queries/general';
+import UserDao from '../dao/user';
 
 const UserService = {
   async createUser(data: any) {
-    return GeneralQueries.createUser(data);
+    return UserDao.createUser(data);
   },
   async getUser(args:any){
-    return GeneralQueries.getUser(args);
+    return UserDao.getUser(args);
   }
 };
 

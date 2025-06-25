@@ -1,5 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
-import chat from './chat';
+import chat from './chat'
 import user from './user';
 import logger from '../helpers/logger';
 const router = express.Router();
@@ -12,8 +12,8 @@ router.get('/', (_req, res) => {
 });
 
 //app routes
-router.use('/api/openai/chats', chat);
-router.use('/api/openai/users', user)
+router.use('/api/chats', chat);
+router.use('/api/users', user)
 
 //not found route
 router.use((_req, res) => {

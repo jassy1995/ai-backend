@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
 import {comparePasswords, hashPassword} from '../helpers/auth';
+import db from '../lib/db';
 import logger from '../lib/logger';
 
-const schema = new mongoose.Schema(
+
+const schema = new db.test.Schema(
   {
     fullName: {
       type: String,
@@ -44,7 +46,7 @@ const schema = new mongoose.Schema(
       default: () => Date.now(),
     },
   },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+  { collection: 'users',timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 interface UserBaseDocument extends Document, mongoose.InferSchemaType<typeof schema> {
@@ -61,7 +63,7 @@ schema.methods.comparePasswords = function (password: string) {
   return comparePasswords(password, this.password);
 };
 
-const User = mongoose.model<UserBaseDocument>('User', schema);
+const User = db.test.model<UserBaseDocument>('User', schema);
 
 User.syncIndexes().catch(e => logger.error(e));
 

@@ -1,21 +1,7 @@
-import mongoose from 'mongoose';
 import logger from '../lib/logger';
+import db from '../lib/db';
 
-const messageSchema = new mongoose.Schema(
-  {
-    role: {
-      type: String,
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
-
-const schema = new mongoose.Schema(
+const schema = new db.test.Schema(
   {
     title: {
       type: String,
@@ -24,22 +10,31 @@ const schema = new mongoose.Schema(
       trim: true,
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: db.test.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
     bot: {
-      type: mongoose.Schema.Types.String,
+      type: db.test.Schema.Types.String,
       required: true,
-      default: 'bambi',
     },
-    messages: [messageSchema],
   },
-  { timestamps: true }
+  {
+    collection: 'chats',
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
-const Chat = mongoose.model('Chat', schema);
+schema.virtual('messages', {
+  ref: 'Message',
+  localField: '_id',
+  foreignField: 'chat',
+});
 
-Chat.syncIndexes().catch(e => logger.error(e));
+const Chat = db.test.model('Chat', schema);
+
+Chat.syncIndexes().catch((e) => logger.error(e));
 
 export default Chat;

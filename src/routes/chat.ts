@@ -1,20 +1,11 @@
 import express from 'express';
 import ChatController from '../controllers/chat';
 import validate from '../middlewares/validate';
-import { messageSchema, promptSchema } from '../schemas/chat';
+import { conversationSchema, messageSchemaParam } from '../schemas/chat';
 
 const router = express.Router();
 
-router.get('/messenger', validate(messageSchema), ChatController.getCompletion);
-router.post(
-  '/prompt/generate',
-  validate(promptSchema),
-  ChatController.generatePrompt
-);
-router.post(
-  '/prompt/improve',
-  validate(promptSchema),
-  ChatController.improvePrompt
-);
+router.post('/messenger', validate(conversationSchema), ChatController.chatMessenger);
+router.get('/chat/:chatId', validate(messageSchemaParam), ChatController.getChatMessages);
 
 export default router;
