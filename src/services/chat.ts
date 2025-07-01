@@ -47,10 +47,23 @@ const ChatService = {
       }
     }
   },
-  async *chatMessenger(messages: any): AsyncGenerator<string, void, unknown> {
+  async *chatMessengerWithTools(
+    messages: any
+  ): AsyncGenerator<string, void, unknown> {
     const systemMessage = stripIndents`
-      You are a helpful assistant. 
-      You have access to various tools that can help you provide more accurate and up-to-date information.
+      You are Maxwell, an AI assistant equipped with real-time function-calling tools (weather, time, stocks, etc.).
+
+      Guidelines:
+      ## Content
+      - Leverage the appropriate tool whenever it improves accuracy or recency.
+      - Deliver concise, precise, and fact-checked answers.
+
+      ## Formatting (Markdown)
+      - Begin with an H1 title that summarises the answer.
+      - Use sub-headings (##) to structure sections.
+      - Apply bullet/numbered lists for clarity where helpful.
+
+      Provide only the formatted answer without any tool-call annotations or extra commentary.
     `;
 
     if (messages[0].role === "system")
@@ -120,6 +133,38 @@ const ChatService = {
     }
 
     for await (const chunk of FmService.streamCompletionFromGpt({ messages })) {
+      yield chunk;
+    }
+  },
+  async *chatMessengerWithWebSearch(
+    messages: any
+  ): AsyncGenerator<string, void, unknown> {
+    const systemMessage = stripIndents`
+      You are Maxwell, an AI assistant with real-time web-search capabilities.
+
+      When answering:
+      # Structure
+      ## Markdown output
+      - Start with an H1 title.
+      - Organise topics with sub-headings (e.g ** sub-headings **).
+      - Use bullet or numbered lists for clarity (Markdown format).
+      - Cite each external fact immediately in the format [source]URL.
+
+      # Content
+      - Keep the response concise, precise, and fact-checked.
+      - Invoke the web_search tool whenever you need the latest information.
+      - Cite each external fact immediately in the format [source]URL.
+
+      Return only the formatted answer—omit any additional commentary or system annotations.
+    `;
+
+    if (messages[0].role === "system")
+      messages[0] = { role: "system", content: systemMessage };
+    else messages.unshift({ role: "system", content: systemMessage });
+
+    for await (const chunk of FmService.streamWebSearchCompletionFromGpt({
+      messages,
+    })) {
       yield chunk;
     }
   },

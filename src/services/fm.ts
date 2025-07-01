@@ -1,7 +1,6 @@
 import openai from "../lib/openai";
 import OpenAI from "openai";
 import { toolsSchema } from "../helpers/tools";
-import { stripIndents } from "common-tags";
 
 const FmService = {
   async getCompletionFromGpt(prompt: string) {
@@ -30,7 +29,7 @@ const FmService = {
     return response.choices[0].message;
   },
   async getChatCompletionStreamFromGpt(messages: any[]) {
-    messages = this.appendSystemMessage(messages);
+    console.log("messages-completion-stream", messages[0]);
     const options: any = {
       model: "gpt-4o-mini",
       temperature: 0.5,
@@ -42,35 +41,40 @@ const FmService = {
     };
     return openai.chat.completions.create(options);
   },
-  async *streamCompletionFromGpt({
-    messages,
-  }: {
-    messages: any[];
-  }): AsyncGenerator<string, void, unknown> {
-    messages = this.appendSystemMessage(messages);
-    const stream: any = await openai.chat.completions.create({
+  async *streamCompletionFromGpt({ messages }: { messages: any[] }) {
+    console.log("messages-completion", messages[0]);
+    const options: any = {
       model: "gpt-4o-mini",
       temperature: 0.5,
       max_tokens: 4000,
       messages,
       stream: true,
       response_format: { type: "text" },
-    } as any);
+    } as any;
+    const stream: any = await openai.chat.completions.create(options);
     for await (const chunk of stream) {
       const content = chunk.choices?.[0]?.delta?.content;
       if (content) yield content;
     }
   },
-  appendSystemMessage(messages: any[]) {
-    const systemMessage = stripIndents`
-      You are a helpful assistant.
-      You have access to various tools.
-      `;
-    // Respond with only the answer, no extra commentary.
-    if (messages[0].role === "system")
-      messages[0] = { role: "system", content: systemMessage };
-    else messages.unshift({ role: "system", content: systemMessage });
-    return messages;
+  async *streamWebSearchCompletionFromGpt({ messages }: { messages: any[] }) {
+    const options: any = {
+      model: "gpt-4o-mini-search-preview",
+      max_tokens: 4000,
+      messages,
+      stream: true,
+      response_format: { type: "text" },
+      web_search_options: {
+        search_context_size: "medium",
+      },
+    } as any;
+
+    const stream: any = await openai.chat.completions.create(options);
+
+    for await (const chunk of stream) {
+      const content = chunk.choices?.[0]?.delta?.content;
+      if (content) yield content;
+    }
   },
 };
 

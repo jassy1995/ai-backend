@@ -74,6 +74,24 @@ const toolSchema = [
       // strict: true,
     },
   },
+  // {
+  //   type: "function",
+  //   function: {
+  //     name: "google_for_answers",
+  //     description:
+  //       "Search Google with fully-formed http URL to enhance knowledge.",
+  //     parameters: {
+  //       type: "object",
+  //       properties: {
+  //         url: {
+  //           type: "string",
+  //         },
+  //       },
+  //       required: [],
+  //       // additionalProperties: false,
+  //     },
+  //   },
+  // },
 ];
 
 export default toolSchema;

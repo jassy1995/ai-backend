@@ -4,6 +4,36 @@ import UserService from "../services/user";
 import { generateRandomHex } from "../helpers/utils";
 
 const ChatController = {
+  async getWebSearchResults(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { message } = req.body;
+      let messages: any = [{ role: "user", content: message }];
+      let fullResponse = "";
+
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      try {
+        for await (const chunk of ChatService.chatMessengerWithWebSearch(
+          messages
+        )) {
+          res.write(`data: ${chunk}\n\n`);
+          res.flush();
+          fullResponse += chunk;
+        }
+        res.write(`data: [END]:${fullResponse}\n\n`);
+        res.flush();
+        res.end();
+      } catch (err: any) {
+        res.write(`data: [ERROR]:${err.message}\n\n`);
+        res.flush();
+        res.end();
+      }
+    } catch (e: any) {
+      return next(e);
+    }
+  },
   async getChatMessages(req: Request, res: Response, next: NextFunction) {
     try {
       const chatId = req.params.chatId as string;
@@ -15,7 +45,7 @@ const ChatController = {
   },
   async chatMessenger(req: Request, res: Response, next: NextFunction) {
     try {
-      const { message, userId, chatId, bot } = req.body;
+      const { message, userId, chatId, bot, tool } = req.body;
 
       let messages: any = [];
       let chat: any = chatId;
@@ -67,7 +97,14 @@ const ChatController = {
       let fullResponse = "";
 
       try {
-        for await (const chunk of ChatService.chatMessenger(messages)) {
+        const streamGenerator =
+          tool === "web_search"
+            ? ChatService.chatMessengerWithWebSearch([
+                { role: "user", content: message },
+              ])
+            : ChatService.chatMessengerWithTools(messages);
+
+        for await (const chunk of streamGenerator) {
           res.write(`data: ${chunk}\n\n`);
           res.flush();
           fullResponse += chunk;
