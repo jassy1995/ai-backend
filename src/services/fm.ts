@@ -29,7 +29,6 @@ const FmService = {
     return response.choices[0].message;
   },
   async getChatCompletionStreamFromGpt(messages: any[]) {
-    console.log("messages-completion-stream", messages[0]);
     const options: any = {
       model: "gpt-4o-mini",
       temperature: 0.5,
@@ -42,7 +41,6 @@ const FmService = {
     return openai.chat.completions.create(options);
   },
   async *streamCompletionFromGpt({ messages }: { messages: any[] }) {
-    console.log("messages-completion", messages[0]);
     const options: any = {
       model: "gpt-4o-mini",
       temperature: 0.5,

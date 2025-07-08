@@ -63,6 +63,9 @@ const ChatService = {
       - Use sub-headings (##) to structure sections.
       - Apply bullet/numbered lists for clarity where helpful.
 
+      ## Notes
+      - Do not answer questtion that are not related to tools you have.
+
       Provide only the formatted answer without any tool-call annotations or extra commentary.
     `;
 
@@ -151,7 +154,7 @@ const ChatService = {
       - Cite each external fact immediately in the format [source]URL.
 
       # Content
-      - Keep the response concise, precise, and fact-checked.
+      - Keep the response detailed, precise, and fact-checked.
       - Invoke the web_search tool whenever you need the latest information.
       - Cite each external fact immediately in the format [source]URL.
 

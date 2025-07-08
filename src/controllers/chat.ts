@@ -18,15 +18,33 @@ const ChatController = {
         for await (const chunk of ChatService.chatMessengerWithWebSearch(
           messages
         )) {
-          res.write(`data: ${chunk}\n\n`);
+          res.write(
+            `data: ${JSON.stringify({
+              content: chunk,
+              isError: false,
+              isEnd: false,
+            })}\n\n`
+          );
           res.flush();
           fullResponse += chunk;
         }
-        res.write(`data: [END]:${fullResponse}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({
+            content: fullResponse,
+            isError: false,
+            isEnd: true,
+          })}\n\n`
+        );
         res.flush();
         res.end();
       } catch (err: any) {
-        res.write(`data: [ERROR]:${err.message}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({
+            content: err.message,
+            isError: true,
+            isEnd: true,
+          })}\n\n`
+        );
         res.flush();
         res.end();
       }
@@ -99,17 +117,27 @@ const ChatController = {
       try {
         const streamGenerator =
           tool === "web_search"
-            ? ChatService.chatMessengerWithWebSearch([
-                { role: "user", content: message },
-              ])
+            ? ChatService.chatMessengerWithWebSearch(messages)
             : ChatService.chatMessengerWithTools(messages);
 
         for await (const chunk of streamGenerator) {
-          res.write(`data: ${chunk}\n\n`);
-          res.flush();
           fullResponse += chunk;
+          res.write(
+            `data: ${JSON.stringify({
+              content: chunk,
+              isError: false,
+              isEnd: false,
+            })}\n\n`
+          );
+          res.flush();
         }
-        res.write(`data: [END]:${fullResponse}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({
+            content: fullResponse,
+            isError: false,
+            isEnd: true,
+          })}\n\n`
+        );
         res.flush();
         res.end();
 
@@ -126,7 +154,13 @@ const ChatController = {
           await ChatService.updateChatTitleIfNeeded(chat);
         }
       } catch (err: any) {
-        res.write(`data: [ERROR]:${err.message}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({
+            content: err.message,
+            isError: true,
+            isEnd: true,
+          })}\n\n`
+        );
         res.flush();
         res.end();
       }
